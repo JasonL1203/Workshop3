@@ -1,3 +1,6 @@
+To see the results, go to : http://localhost:5000/predict?area=1000&bedrooms=2&bathrooms=2&stories=1&mainroad=1&guestroom=0&basement=1&hotwaterheating=0&airconditioning=1&parking=1&prefarea=1&furnishingstatus=1
+
+
 # Data Redundancy and Distributed Computing Workshop
 
 Please add your repo link here: https://docs.google.com/spreadsheets/d/1M_8tSkOGvB49IqCknh4QoGfxgSeskqflMla0ESwAOzc/edit?usp=sharing
