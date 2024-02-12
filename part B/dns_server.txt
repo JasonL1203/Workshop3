@@ -1,0 +1,16 @@
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+# Define a route that responds with the server's URL
+@app.route('/getServer')
+def get_server():
+    server_url = f"localhost:3000"  # Update the port as needed
+    response = {"code": 200, "server": server_url}
+    return jsonify(response)
+
+# Start the DNS registry server
+if __name__ == '__main__':
+    app.run(port=3000)
+
+# go to this url : http://localhost:3000/getServer

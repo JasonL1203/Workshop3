@@ -1,0 +1,100 @@
+const express = require('express');
+const router = express.Router();
+// test
+app.get('/products', (req, res) => {
+    const { category, inStock } = req.query;
+    let query = productsDb.get('products');
+    
+    if (category) {
+        query = query.filter({ category });
+    }
+    if (inStock) {
+        query = query.filter(p => p.stockStatus === (inStock === 'true'));
+    }
+    
+    res.json(query.value());
+});
+app.get('/products/:id', (req, res) => {
+    const product = productsDb.get('products').find({ id: req.params.id }).value();
+    res.json(product);
+});
+app.post('/products', (req, res) => {
+    const product = req.body;
+    productsDb.get('products').push(product).last().assign({ id: Date.now().toString() }).write();
+    res.json(product);
+});
+app.put('/products/:id', (req, res) => {
+    const update = req.body;
+    productsDb.get('products').find({ id: req.params.id }).assign(update).write();
+    res.json(productsDb.get('products').find({ id: req.params.id }).value());
+});
+app.delete('/products/:id', (req, res) => {
+    productsDb.get('products').remove({ id: req.params.id }).write();
+    res.send({ message: 'Product deleted successfully' });
+});
+
+router.post('/orders', (req, res) => {
+    const { productOrders, userId } = req.body; // Assuming an array of { productId, quantity }
+    const newOrder = {
+        id: Date.now(), // Simple ID generation
+        products: [],
+        total: 0,
+        userId
+    };
+
+    productOrders.forEach(order => {
+        const product = productsDb.get('products').find({ id: order.productId }).value();
+        if (!product || product.stock < order.quantity) {
+            return res.status(400).send('Invalid product ID or insufficient stock.');
+        }
+        productsDb.get('products')
+            .find({ id: order.productId })
+            .assign({ stock: product.stock - order.quantity })
+            .write();
+
+        newOrder.products.push(order);
+        newOrder.total += product.price * order.quantity;
+    });
+
+    ordersDb.get('orders').push(newOrder).write();
+
+    res.json(newOrder);
+});
+
+router.get('/orders/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const userOrders = ordersDb.get('orders').filter({ userId }).value();
+    res.json(userOrders);
+});
+router.post('/cart/:userId', (req, res) => {
+    const { productId, quantity } = req.body;
+    const userId = req.params.userId;
+
+    const product = productsDb.get('products').find({ id: productId }).value();
+    if (!product) {
+        return res.status(400).send('Product does not exist.');
+    }
+
+    const cart = cartsDb.get('carts').find({ userId }).value();
+    if (cart) {
+        // Update cart logic here
+    } else {
+        // Create new cart logic here
+        cartsDb.get('carts').push({
+            userId,
+            items: [{ productId, quantity }]
+        }).write();
+    }
+
+    res.json(cartsDb.get('carts').find({ userId }).value());
+});
+router.get('/cart/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const cart = cartsDb.get('carts').find({ userId }).value();
+    res.json(cart || {});
+});
+router.delete('/cart/:userId/item/:productId', (req, res) => {
+    const { userId, productId } = req.params;
+    // Removal logic here
+    res.json({ message: 'Product removed from cart' });
+});
