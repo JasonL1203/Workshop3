@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Frontend</title>
+</head>
+<body>
+    <h1>E-commerce Frontend</h1>
+
+    <h2>Products</h2>
+    <form id="productForm">
+        <label for="productName">Product Name:</label>
+        <input type="text" id="productName" required><br>
+
+        <label for="productCategory">Category:</label>
+        <input type="text" id="productCategory" required><br>
+
+        <label for="productSellPrice">Sell Price:</label>
+        <input type="number" id="productSellPrice" step="0.01" required><br>
+
+        <label for="productInventory">Inventory:</label>
+        <input type="number" id="productInventory" required><br>
+
+        <label for="productPurchasePrice">Purchase Price:</label>
+        <input type="number" id="productPurchasePrice" step="0.01" required><br>
+
+        <label for="productDescription">Description:</label>
+        <input type="text" id="productDescription"><br>
+
+        <button type="submit">Add Product</button>
+    </form>
+    <p id="productMessage"></p>
+
+
+    <hr>
+
+    <h2>Orders</h2>
+    <form id="orderForm">
+        <label for="orderUserId">User ID:</label>
+        <input type="text" id="orderUserId" required><br>
+
+        <label for="orderStatus">Status:</label>
+        <input type="text" id="orderStatus" required><br>
+
+        <label for="orderProducts">Products:</label>
+        <textarea id="orderProducts" required></textarea><br>
+
+        <button type="submit">Create Order</button>
+    </form>
+    <p id="orderMessage"></p>
+
+    <script>
+        document.getElementById('productForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const response = await fetch('/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name_product: document.getElementById('productName').value,
+                    category: document.getElementById('productCategory').value,
+                    sell_price: parseFloat(document.getElementById('productSellPrice').value),
+                    inventory_product: parseInt(document.getElementById('productInventory').value),
+                    purchase_price: parseFloat(document.getElementById('productPurchasePrice').value),
+                    description: document.getElementById('productDescription').value
+                })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                document.getElementById('productMessage').textContent = 'Product added successfully!';
+            } else {
+                document.getElementById('productMessage').textContent = 'Failed to add product.';
+            }
+            console.log(data);
+        });
+
+        document.getElementById('orderForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const response = await fetch('/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id_order: Math.random().toString(36).substring(7),
+                    id_client: document.getElementById('orderUserId').value,
+                    status_order: document.getElementById('orderStatus').value,
+                    products_order: JSON.parse(document.getElementById('orderProducts').value)
+                })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                document.getElementById('orderMessage').textContent = 'Order created successfully!';
+            } else {
+                document.getElementById('orderMessage').textContent = 'Failed to create order.';
+            }
+            console.log(data);
+        });
+    </script>
+</body>
+</html>
